@@ -1,6 +1,6 @@
 from pathlib import Path
 
-# 生成一個新的 Streamlit page 內容：圓餅圖統計頁面
+# 修改後的 pie_chart.py 程式內容：支援多欄位合併統計
 pie_chart_code = """
 import streamlit as st
 import pandas as pd
@@ -25,19 +25,31 @@ if df.empty:
     st.warning("讀取失敗或無資料")
     st.stop()
 
-# 選擇圓餅圖分類欄位
-target_col = st.selectbox("選擇要統計的欄位", df.columns)
+# 多欄位複選統計
+target_cols = st.multiselect("選擇要統計的欄位（可複選）", df.columns)
 
-# 統計數量
-counts = df[target_col].value_counts().reset_index()
+if not target_cols:
+    st.warning("請選擇至少一個欄位以生成圓餅圖。")
+    st.stop()
+
+# 抽出所有非空值組合進統一列表
+values = []
+for _, row in df.iterrows():
+    for col in target_cols:
+        val = row.get(col, "")
+        if pd.notna(val) and str(val).strip():
+            values.append(str(val).strip())
+
+# 統計
+counts = pd.Series(values).value_counts().reset_index()
 counts.columns = ['項目', '數量']
 
-# 顯示圓餅圖
-fig = px.pie(counts, names='項目', values='數量', title=f"「{target_col}」欄位的分類統計")
+# 繪製圓餅圖
+fig = px.pie(counts, names='項目', values='數量', title="選取欄位合併後的分類統計")
 st.plotly_chart(fig, use_container_width=True)
 
-# 顯示統計表格
-with st.expander("🔍 查看原始統計資料表"):
+# 展示資料表
+with st.expander("🔍 查看統計資料表"):
     st.dataframe(counts, use_container_width=True)
 """
 
