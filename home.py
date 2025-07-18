@@ -4,7 +4,7 @@ import streamlit as st
 st.set_page_config(page_title="分項計畫工具 主介面", layout="wide")
 
 # 主標題
-st.title("分項計畫工具 主介面")
+st.title("分項計畫工具 主介面!")
 
 # 功能選單說明
 st.markdown(
